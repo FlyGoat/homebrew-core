@@ -1,9 +1,10 @@
 class Systemc < Formula
   desc "Core SystemC language and examples"
   homepage "https://accellera.org/"
-  url "https://www.accellera.org/images/downloads/standards/systemc/systemc-2.3.2.tar.gz"
-  sha256 "a28eeee00189f0e39f51461dcd7dbed7fb38e4e07dbd9e723473000ce6ef73c5"
+  url "https://www.accellera.org/images/downloads/standards/systemc/systemc-2.3.3.tar.gz"
+  sha256 "5781b9a351e5afedabc37d145e5f7edec08f3fd5de00ffeb8fa1f3086b1f7b3f"
   license "Apache-2.0"
+  head "https://github.com/accellera-official/systemc.git", branch: "master"
 
   livecheck do
     url "https://www.accellera.org/downloads/standards/systemc"
@@ -21,19 +22,18 @@ class Systemc < Formula
     sha256 cellar: :any_skip_relocation, x86_64_linux: "fbf3d2f9781a9d146d9b03ea4fbc36584331b3adfdbec24df0a7446e9420a0f0"
   end
 
-  # Fix -flat_namespace being used on Big Sur and later.
+  depends_on "cmake" => :build
+
+  # Fix Apple Silicon build
   patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/03cf8088210822aa2c1ab544ed58ea04c897d9c4/libtool/configure-pre-0.4.2.418-big_sur.diff"
-    sha256 "83af02f2aa2b746bb7225872cab29a253264be49db0ecebb12f841562d9a2923"
+    url "https://github.com/accellera-official/systemc/commit/26e2b2c9db912ed27d5a1bcf9ff36e188764bce6.patch?full_index=1"
+    sha256 "37667230fb4226834f86d6a780dda10b8cb5ca705d29006e17279f95dcfcdde2"
   end
 
   def install
-    system "./configure", "--disable-debug",
-                          "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--with-arch-suffix=",
-                          "--prefix=#{prefix}"
-    system "make", "install"
+    system "cmake", "-S", ".", "-B", "build", *std_cmake_args
+    system "cmake", "--build", "build"
+    system "cmake", "--install", "build"
   end
 
   test do
